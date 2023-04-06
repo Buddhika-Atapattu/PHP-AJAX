@@ -51,8 +51,22 @@ $html = "";
 $html .= '<div class="row">';
 while($resultRow = $result->fetch_assoc()){
 $html .=  '<div class="col-lg-4 card p-0">'.
-    '<img alt="" class="card-image-top h-100" src="'. $resultRow['image_url'] .'"> '.
+    '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
 '</div>';
+$html .='<script>
+    $(document).ready(()=>{
+        $("#img_'.$resultRow['id'].'").on("click",()=>{
+            let image = $("#img_'.$resultRow['id'].'").get(0);
+            if (image.requestFullscreen) {
+                image.requestFullscreen();
+              } else if (image.webkitRequestFullscreen) { /* Safari */
+                image.webkitRequestFullscreen();
+              } else if (image.msRequestFullscreen) { /* IE11 */
+                image.msRequestFullscreen();
+              }
+        });
+    });
+    </script>';
 }
 
 $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex">';
@@ -62,6 +76,7 @@ for($i=1; $i <= $totalPage; $i++){
     // '</li>';
     $onclick = "window.location.href='index.php?page=".$i."'";
     $html .= '<li class="list-group-item border-0 p-0"><button class="btn btn-outline-dark mx-2" id="btn_'.$i.'" onclick="'.$onclick.'">'.$i.'</button></li>';
+    
 }
 
 echo $html .= '</ul></div>';
