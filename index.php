@@ -23,6 +23,38 @@
         $number = 4;
         $start = ($page - 1) * $number;
     ?>
+    <?php
+    $con = mysqli_connect('localhost','root','','testdb');
+
+    $allImages = "SELECT * FROM image";
+
+    $rowsResult = $con->query($allImages);
+
+    $rows = mysqli_num_rows($rowsResult);
+
+    $numbersPerPage = 9;
+
+    $totalPages = ceil($rows/$numbersPerPage);
+    ?>
+
+    <script>
+        let count = 1;
+        $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: count},
+                dataType:"html",
+                // processData:false,
+                // contentType:false,
+                // cache:false,
+                success:(data)=>{
+                    
+                    // let item = JSON.parse(data);
+                    $("#mydiv").html(data);
+                    // console.log(data);
+                },
+            });
+    </script>
 </head>
 <body>
     <section>
@@ -47,36 +79,30 @@
     </section>
 </body>
 <script>
-    function submit(){
-        alert("Hi")
-    }
+    // function submit(){
+    //     alert("Hi")
+    // }
 
     $(document).ready(function(){
-        <?php 
-        if(isset($_GET['page'])){
-            $count = $_GET['page'];
-        }    
-        else{
-            $count = 1;
-        }
-        ?>
-        let count = <?php echo $count?>;
         
+        count = $("#page_number").val();
+
         $.ajax({
-            url:'infor.php',
-            method:'POST',
-            data:{count: count},
-            dataType:'html',
-            // processData:false,
-            // contentType:false,
-            // cache:false,
-            success:(data)=>{
-                
-                // let item = JSON.parse(data);
-                $('#mydiv').html(data);
-                // console.log(data);
-            },
-        });
+                url:'infor.php',
+                method:'POST',
+                data:{count: count},
+                dataType:'html',
+                // processData:false,
+                // contentType:false,
+                // cache:false,
+                success:(data)=>{
+                    
+                    // let item = JSON.parse(data);
+                    $('#mydiv').html(data);
+                    // console.log(data);
+                },
+            });
+        
         $('form').submit(function(e){
             e.preventDefault();
             let formData = new FormData(this);
@@ -101,7 +127,9 @@
                     console.log('error => '+data)
                 }
             });
-        })
-    })
+        });
+        
+        
+    });
 </script>
 </html>

@@ -2,6 +2,7 @@
 $con = mysqli_connect('localhost','root','','testdb');
 
 
+
 if(isset($_POST['image'])){
     $file = $_FILES['image']['name'];
 
@@ -26,70 +27,99 @@ if(isset($_POST['image'])){
     }
 }
 
+
+
 if(isset($_POST['count'])){
-    $count = $_POST['count'];
+    $page = $_POST['count'];
 }
 else{
-    $count = 1;
+    $page = 1;
 }
 
 
-    
+$numbersPerPage = 9;
 
-$number = 9;
-$start = ($count - 1) * $number;
+$startFrom = ($page - 1) * $numbersPerPage;
 
+$selectImages = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
 
+$result = $con->query($selectImages);
 
-$select = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $start,$number";
+$rows2 = mysqli_num_rows($result);
+
 $allImages = "SELECT * FROM image";
-$result2 = $con->query($allImages);
-$result = $con->query($select);
-$rows = mysqli_num_rows($result2);
-$totalPage = ceil($rows/$number);
+
+$rowsResult = $con->query($allImages);
+
+$rows = mysqli_num_rows($rowsResult);
+
+$totalPages = ceil($rows/$numbersPerPage);
+
+
 $html = "";
 $html .= '<div class="row">';
 while($resultRow = $result->fetch_assoc()){
-$html .=  '<div class="col-lg-4 card p-0">'.
-    '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
-'</div>';
-$html .='<script>
-    $(document).ready(()=>{
-        $("#img_'.$resultRow['id'].'").on("click",()=>{
-            let image = $("#img_'.$resultRow['id'].'").get(0);
-            if (image.requestFullscreen) {
-                image.requestFullscreen();
-              } else if (image.webkitRequestFullscreen) { /* Safari */
-                image.webkitRequestFullscreen();
-              } else if (image.msRequestFullscreen) { /* IE11 */
-                image.msRequestFullscreen();
-              }
+    $html .=  '<div class="col-lg-4 card p-0">'.
+        '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+    '</div>';
+    $html .='<script>
+        $(document).ready(()=>{
+            $("#img_'.$resultRow['id'].'").on("click",()=>{
+                let image = $("#img_'.$resultRow['id'].'").get(0);
+                if (image.requestFullscreen) {
+                    image.requestFullscreen();
+                } else if (image.webkitRequestFullscreen) { /* Safari */
+                    image.webkitRequestFullscreen();
+                } else if (image.msRequestFullscreen) { /* IE11 */
+                    image.msRequestFullscreen();
+                }
+            });
         });
-    });
-    </script>';
+        </script>';
 }
 
-$html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex">';
-for($i=1; $i <= $totalPage; $i++){
-    // $html .= '<li class="list-group-item border-0 p-0">'.
-    // ' <a class="text-decoration-none d-block text-light btn btn-dark mx-2" href="index.php?page='.$i.'">'.$i.'<a>'.
-    // '</li>';
+
+
+
+$html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
+// $html .= '<script>let pageArray = [];</script>';
+for($i=1; $i <= $totalPages; $i++){
     $onclick = "window.location.href='index.php?page=".$i."'";
-    $html .= '<li class="list-group-item border-0 p-0"><button class="btn btn-outline-dark mx-2" id="btn_'.$i.'" onclick="'.$onclick.'">'.$i.'</button></li>';
-    
+    // $html .= '<li class="list-group-item border-0 p-0"><button class="btn btn-outline-dark mx-2" id="btn_'.$i.'" onclick="'.$onclick.'">'.$i.'</button></li>';
+    $html .= '<li class="list-group-item border-0 p-0">
+    <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
+    <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+    </li>';
+    $html .= '<script> 
+    $(document).ready(()=>{
+        $("#btn_'.$i.'").on("click",function(){
+            
+            let page = $("#btn_input_'.$i.'").val();
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                // processData:false,
+                // contentType:false,
+                // cache:false,
+                success:(data)=>{
+                    
+                    // let item = JSON.parse(data);
+                    $("#mydiv").html(data);
+                    // console.log(data);
+                },
+            });
+        });
+    });
+     </script>';
 }
+// $html .= '<script>console.log(pageArray)</script>';
+$html .= '<input type="hidden" value="'.$page.'" id="page_number">';
 
 echo $html .= '</ul></div>';
 
-// $data = array(
-//     'html'=>$html,
-//     'row'=>$rows,
-//     'totalPage'=>$totalPage,
-//     'count'=>$count,
-//     'number'=>$number
-// );
-
-// echo json_encode($data);
 
 
 
