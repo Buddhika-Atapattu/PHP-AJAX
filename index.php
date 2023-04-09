@@ -9,34 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-
     <title>Document</title>
-    <?php
-    
-
-        if(isset($_GET['page'])){
-            $page = $_GET['page'];
-        }
-        else{
-            $page = 1;
-        }
-        $number = 4;
-        $start = ($page - 1) * $number;
-    ?>
-    <?php
-    $con = mysqli_connect('localhost','root','','testdb');
-
-    $allImages = "SELECT * FROM image";
-
-    $rowsResult = $con->query($allImages);
-
-    $rows = mysqli_num_rows($rowsResult);
-
-    $numbersPerPage = 9;
-
-    $totalPages = ceil($rows/$numbersPerPage);
-    ?>
-
     <script>
         let count = 1;
         $.ajax({
@@ -44,14 +17,8 @@
                 method:"POST",
                 data:{count: count},
                 dataType:"html",
-                // processData:false,
-                // contentType:false,
-                // cache:false,
                 success:(data)=>{
-                    
-                    // let item = JSON.parse(data);
                     $("#mydiv").html(data);
-                    // console.log(data);
                 },
             });
     </script>
@@ -92,14 +59,8 @@
                 method:'POST',
                 data:{count: count},
                 dataType:'html',
-                // processData:false,
-                // contentType:false,
-                // cache:false,
                 success:(data)=>{
-                    
-                    // let item = JSON.parse(data);
                     $('#mydiv').html(data);
-                    // console.log(data);
                 },
             });
         
@@ -119,7 +80,6 @@
                     console.log('beforeSend => '+data);
                 },
                 success:(data)=>{
-                    // console.log(data);
                     $('form').get(0).reset();
                     $('#mydiv').html(data);
                 },

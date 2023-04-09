@@ -1,12 +1,11 @@
 <?php
+// database connection
 $con = mysqli_connect('localhost','root','','testdb');
 
 
-
+// uploading image to the database
 if(isset($_POST['image'])){
     $file = $_FILES['image']['name'];
-
-    // print_r($file);
 
     if($file !== ""){
         $fileName = hexdec(uniqid()).'.png';
@@ -28,7 +27,7 @@ if(isset($_POST['image'])){
 }
 
 
-
+// checking the page number
 if(isset($_POST['count'])){
     $page = $_POST['count'];
 }
@@ -36,26 +35,31 @@ else{
     $page = 1;
 }
 
-
+// define the item per page
 $numbersPerPage = 9;
 
+// define the starting from the database
 $startFrom = ($page - 1) * $numbersPerPage;
 
+// select images per page from database
 $selectImages = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
 
+// run query
 $result = $con->query($selectImages);
 
-$rows2 = mysqli_num_rows($result);
-
+// select all images from database
 $allImages = "SELECT * FROM image";
 
+// run query
 $rowsResult = $con->query($allImages);
 
+// get tebal rows
 $rows = mysqli_num_rows($rowsResult);
 
+// get round number
 $totalPages = ceil($rows/$numbersPerPage);
 
-
+// output
 $html = "";
 $html .= '<div class="row">';
 while($resultRow = $result->fetch_assoc()){
@@ -82,6 +86,27 @@ while($resultRow = $result->fetch_assoc()){
 
 
 $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
+$html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
+        </li>';
+$html .= '<script> 
+$(document).ready(()=>{
+    $("#btn_left").on("click",function(){
+        
+        let page = '.$page.'-1;
+        
+        $.ajax({
+            url:"infor.php",
+            method:"POST",
+            data:{count: page},
+            dataType:"html",
+            success:(data)=>{
+                $("#mydiv").html(data);
+            },
+        });
+    });
+});
+</script>';
 // $html .= '<script>let pageArray = [];</script>';
 for($i=1; $i <= $totalPages; $i++){
     $onclick = "window.location.href='index.php?page=".$i."'";
@@ -110,21 +135,35 @@ for($i=1; $i <= $totalPages; $i++){
                 method:"POST",
                 data:{count: page},
                 dataType:"html",
-                // processData:false,
-                // contentType:false,
-                // cache:false,
                 success:(data)=>{
-                    
-                    // let item = JSON.parse(data);
                     $("#mydiv").html(data);
-                    // console.log(data);
                 },
             });
         });
     });
-     </script>';
+    </script>';
 }
-// $html .= '<script>console.log(pageArray)</script>';
+$html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
+        </li>';
+$html .= '<script> 
+$(document).ready(()=>{
+    $("#btn_right").on("click",function(){
+        
+        let page = '.$page.'+1;
+        
+        $.ajax({
+            url:"infor.php",
+            method:"POST",
+            data:{count: page},
+            dataType:"html",
+            success:(data)=>{
+                $("#mydiv").html(data);
+            },
+        });
+    });
+});
+</script>';
 $html .= '<input type="hidden" value="'.$page.'" id="page_number">';
 
 echo $html .= '</ul></div>';
