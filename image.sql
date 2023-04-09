@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2023 at 09:09 PM
+-- Generation Time: Apr 09, 2023 at 07:40 PM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.5
 
@@ -64,7 +64,11 @@ INSERT INTO `image` (`id`, `image_url`) VALUES
 (25, './image/1762454405759109.png'),
 (26, './image/1762454426778693.png'),
 (27, './image/1762454579037791.png'),
-(28, './image/1762454846618656.png');
+(28, './image/1762454846618656.png'),
+(29, './image/1762456372103750.png'),
+(30, './image/1762458989932874.png'),
+(31, './image/1762697562504287.png'),
+(32, './image/1762709078308090.png');
 
 --
 -- Indexes for dumped tables
@@ -84,7 +88,7 @@ ALTER TABLE `image`
 -- AUTO_INCREMENT for table `image`
 --
 ALTER TABLE `image`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

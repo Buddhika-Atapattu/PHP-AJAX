@@ -127,6 +127,7 @@ if((int)$page !== 1){
 // end left arrow
 
 // pagination numbers
+
 for($i=1; $i <= $totalPages; $i++){
     if($i == $page){
         $html .= '<li class="list-group-item border-0 p-0">
@@ -162,6 +163,9 @@ for($i=1; $i <= $totalPages; $i++){
     });
     // </script>';
 }
+
+
+
 // end pagination numbers
 
 // right arrow
