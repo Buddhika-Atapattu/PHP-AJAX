@@ -56,7 +56,7 @@
 <script>
     // form submitting using ajax
     $(document).ready(function(){
-        
+
         $('form').submit(function(e){
             e.preventDefault();
             let formData = new FormData(this);

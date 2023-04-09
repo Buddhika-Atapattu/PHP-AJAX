@@ -37,7 +37,7 @@ else{
 
 
 // define the item per page
-$numbersPerPage = 9;
+$numbersPerPage = 3;
 
 // define the starting from the database
 $startFrom = ($page - 1) * $numbersPerPage;
@@ -59,6 +59,11 @@ $rows = mysqli_num_rows($rowsResult);
 
 // get round number
 $totalPages = ceil($rows/$numbersPerPage);
+
+// restrincting the page above total pages
+if($page > $totalPages){
+    $page = 1;
+}
 
 // output
 $html = "";
@@ -152,8 +157,10 @@ for($i=1; $i <= $totalPages; $i++){
                 },
             });
         });
+
+        
     });
-    </script>';
+    // </script>';
 }
 // end pagination numbers
 
@@ -184,7 +191,13 @@ if((int)$page !== (int)$totalPages){
 // end right arrow
 
 // display output
-echo $html .= '</ul></div>';
+$html .= '</ul></div>';
+
+// slider option
+
+
+// page number into input
+echo $html .= '<input type="hidden" id="page_id" name="page_id" value="'.(int)$page.'" class="d-none">';
 
 
 
