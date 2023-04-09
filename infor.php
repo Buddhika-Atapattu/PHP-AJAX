@@ -86,10 +86,19 @@ $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline
 for($i=1; $i <= $totalPages; $i++){
     $onclick = "window.location.href='index.php?page=".$i."'";
     // $html .= '<li class="list-group-item border-0 p-0"><button class="btn btn-outline-dark mx-2" id="btn_'.$i.'" onclick="'.$onclick.'">'.$i.'</button></li>';
-    $html .= '<li class="list-group-item border-0 p-0">
-    <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
-    <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
-    </li>';
+    if($i == $page){
+        $html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
+        <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+        </li>';
+    }
+    else{
+        $html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
+        <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+        </li>';
+    }
+    
     $html .= '<script> 
     $(document).ready(()=>{
         $("#btn_'.$i.'").on("click",function(){
