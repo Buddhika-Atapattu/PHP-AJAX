@@ -62,29 +62,39 @@ $totalPages = ceil($rows/$numbersPerPage);
 
 // output
 $html = "";
+
+// images
 $html .= '<div class="row">';
 while($resultRow = $result->fetch_assoc()){
+    // image col
     $html .=  '<div class="col-lg-4 card p-0">'.
         '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
     '</div>';
+    // end image col
+
+    // full screen image
     $html .='<script>
-        $(document).ready(()=>{
-            $("#img_'.$resultRow['id'].'").on("click",()=>{
-                let image = $("#img_'.$resultRow['id'].'").get(0);
-                if (image.requestFullscreen) {
-                    image.requestFullscreen();
-                } else if (image.webkitRequestFullscreen) { /* Safari */
-                    image.webkitRequestFullscreen();
-                } else if (image.msRequestFullscreen) { /* IE11 */
-                    image.msRequestFullscreen();
-                }
-            });
+    $(document).ready(()=>{
+        $("#img_'.$resultRow['id'].'").on("click",()=>{
+            let image = $("#img_'.$resultRow['id'].'").get(0);
+            if (image.requestFullscreen) {
+                image.requestFullscreen();
+            } else if (image.webkitRequestFullscreen) { /* Safari */
+                image.webkitRequestFullscreen();
+            } else if (image.msRequestFullscreen) { /* IE11 */
+                image.msRequestFullscreen();
+            }
         });
-        </script>';
+    });
+    </script>';
+    // end full screen
 }
 $html .= '</div>';
+// end images
 
+// pagination
 $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
+// left arrow
 if((int)$page !== 1){
     
     $html .= '<li class="list-group-item border-0 p-0">
@@ -109,12 +119,10 @@ if((int)$page !== 1){
     });
     </script>';
 }
+// end left arrow
 
-
-// $html .= '<script>let pageArray = [];</script>';
+// pagination numbers
 for($i=1; $i <= $totalPages; $i++){
-    $onclick = "window.location.href='index.php?page=".$i."'";
-    // $html .= '<li class="list-group-item border-0 p-0"><button class="btn btn-outline-dark mx-2" id="btn_'.$i.'" onclick="'.$onclick.'">'.$i.'</button></li>';
     if($i == $page){
         $html .= '<li class="list-group-item border-0 p-0">
         <button class="btn btn-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
@@ -147,6 +155,9 @@ for($i=1; $i <= $totalPages; $i++){
     });
     </script>';
 }
+// end pagination numbers
+
+// right arrow
 if((int)$page !== (int)$totalPages){
     $html .= '<li class="list-group-item border-0 p-0">
             <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
@@ -170,10 +181,9 @@ if((int)$page !== (int)$totalPages){
     });
     </script>';
 }
+// end right arrow
 
-$html .= '<input type="hidden" value="'.$page.'" id="page_number">';
-
-
+// display output
 echo $html .= '</ul></div>';
 
 

@@ -11,6 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>Document</title>
     <script>
+        // fetching image data
+
+        // define page as 1
         let count = 1;
         $.ajax({
                 url:"infor.php",
@@ -21,9 +24,11 @@
                     $("#mydiv").html(data);
                 },
             });
+        // end
     </script>
 </head>
 <body>
+    <!-- image uploading -->
     <section>
         <div class="container">
             <div class="row">
@@ -34,18 +39,22 @@
                             <input type="file" name="image" id="image" class="form-control" placeholder="Email" accept="image/*">
                         </div>
                         <button type="submit" class="btn btn-outline-success">Submit</button>
-                        <!-- <input type="submit" value="submit" name="submit" id="submit" class="btn btn-outline-success"> -->
                     </form>
                 </div>
             </div>
         </div>
     </section>
+    <!-- end uploading -->
+
+    <!-- display images -->
     <section class="mt-5">
         <div class="container" id="mydiv">
         </div>
     </section>
+    <!-- end -->
 </body>
 <script>
+    // form submitting using ajax
     $(document).ready(function(){
         
         $('form').submit(function(e){
@@ -73,5 +82,6 @@
             });
         });
     });
+    // end
 </script>
 </html>
