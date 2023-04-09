@@ -46,23 +46,7 @@
     </section>
 </body>
 <script>
-    // function submit(){
-    //     alert("Hi")
-    // }
-
     $(document).ready(function(){
-        
-        count = $("#page_number").val();
-
-        $.ajax({
-                url:'infor.php',
-                method:'POST',
-                data:{count: count},
-                dataType:'html',
-                success:(data)=>{
-                    $('#mydiv').html(data);
-                },
-            });
         
         $('form').submit(function(e){
             e.preventDefault();
@@ -88,8 +72,6 @@
                 }
             });
         });
-        
-        
     });
 </script>
 </html>

@@ -35,6 +35,7 @@ else{
     $page = 1;
 }
 
+
 // define the item per page
 $numbersPerPage = 9;
 
@@ -81,32 +82,35 @@ while($resultRow = $result->fetch_assoc()){
         });
         </script>';
 }
-
-
-
+$html .= '</div>';
 
 $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
-$html .= '<li class="list-group-item border-0 p-0">
-        <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
-        </li>';
-$html .= '<script> 
-$(document).ready(()=>{
-    $("#btn_left").on("click",function(){
-        
-        let page = '.$page.'-1;
-        
-        $.ajax({
-            url:"infor.php",
-            method:"POST",
-            data:{count: page},
-            dataType:"html",
-            success:(data)=>{
-                $("#mydiv").html(data);
-            },
+if((int)$page !== 1){
+    
+    $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
+            </li>';
+    $html .= '<script> 
+    $(document).ready(()=>{
+        $("#btn_left").on("click",function(){
+            
+            let page = '.$page.'-1;
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                success:(data)=>{
+                    $("#mydiv").html(data);
+                },
+            });
         });
     });
-});
-</script>';
+    </script>';
+}
+
+
 // $html .= '<script>let pageArray = [];</script>';
 for($i=1; $i <= $totalPages; $i++){
     $onclick = "window.location.href='index.php?page=".$i."'";
@@ -143,28 +147,32 @@ for($i=1; $i <= $totalPages; $i++){
     });
     </script>';
 }
-$html .= '<li class="list-group-item border-0 p-0">
-        <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
-        </li>';
-$html .= '<script> 
-$(document).ready(()=>{
-    $("#btn_right").on("click",function(){
-        
-        let page = '.$page.'+1;
-        
-        $.ajax({
-            url:"infor.php",
-            method:"POST",
-            data:{count: page},
-            dataType:"html",
-            success:(data)=>{
-                $("#mydiv").html(data);
-            },
+if((int)$page !== (int)$totalPages){
+    $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
+            </li>';
+    $html .= '<script> 
+    $(document).ready(()=>{
+        $("#btn_right").on("click",function(){
+            
+            let page = '.$page.'+1;
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                success:(data)=>{
+                    $("#mydiv").html(data);
+                },
+            });
         });
     });
-});
-</script>';
+    </script>';
+}
+
 $html .= '<input type="hidden" value="'.$page.'" id="page_number">';
+
 
 echo $html .= '</ul></div>';
 
