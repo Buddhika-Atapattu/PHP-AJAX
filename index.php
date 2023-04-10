@@ -10,20 +10,41 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>Document</title>
+    <?php 
+    // database connection
+    $con = mysqli_connect('localhost','root','','testdb');
+
+    // define the item per page
+    $numbersPerPage = 3;
+
+    // select all images from database
+    $allImages = "SELECT * FROM image";
+
+    // run query
+    $rowsResult = $con->query($allImages);
+
+    // get tebal rows
+    $rows = mysqli_num_rows($rowsResult);
+
+    // get round number
+    $totalPages = ceil($rows/$numbersPerPage);
+    
+    ?>
     <script>
         // fetching image data
 
         // define page as 1
         let count = 1;
+        //using ajax function getting data for first page
         $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: count},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
-            });
+            url:"infor.php",
+            method:"POST",
+            data:{count: count},
+            dataType:"html",
+            success:(data)=>{
+                $("#mydiv").html(data);
+            },
+        });
         // end
     </script>
 </head>
@@ -48,14 +69,17 @@
 
     <!-- display images -->
     <section class="mt-5">
-        <div class="container" id="mydiv">
-        </div>
+        <!-- ajax result showing container -->
+        <div class="container" id="mydiv"></div>
+        <!-- end container -->
     </section>
     <!-- end -->
 </body>
 <script>
     // form submitting using ajax
     $(document).ready(function(){
+        
+        
 
         $('form').submit(function(e){
             e.preventDefault();
