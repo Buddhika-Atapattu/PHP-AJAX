@@ -11,6 +11,8 @@ page.
 // database connection
 $con = mysqli_connect('localhost','root','','testdb');
 
+// output
+$html = "";
 
 // uploading image to the database
 if(isset($_POST['image'])){
@@ -36,6 +38,7 @@ if(isset($_POST['image'])){
 }
 
 
+
 // checking the page number
 if(isset($_POST['count'])){
     $page = $_POST['count'];
@@ -43,6 +46,8 @@ if(isset($_POST['count'])){
 else{
     $page = 1;
 }
+
+$html .= '<input type="hidden" id="page_id" value="'.$page.'">';
 
 
 // define the item per page
@@ -74,8 +79,21 @@ if($page > $totalPages){
     $page = 1;
 }
 
-// output
-$html = "";
+/*
+01. In this section I have defined how many numbers there are per pre / post page by variable name $link.
+02. Get the past page number, assigning $totalPages to variable name $last
+03. Defined start pagination number by $startLink
+04. Defined end pagination number by $endLink
+*/
+
+$link = 3;
+
+$last = $totalPages ;
+
+$startLink = (($page - $link) > 0 ) ? $page - $link : 1;
+
+$endLink = (($page + $link) < $last) ? $page + $link : $last;
+
 
 // define page number
 $html .= '<input type="hidden" id="page_id" name="page_id" value="'.(int)$page.'" class="d-none">';
@@ -109,14 +127,19 @@ while($resultRow = $result->fetch_assoc()){
 $html .= '</div>';
 // end images
 
+
+
+
 // pagination
 $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
-// left arrow
+
+// left arrow, page one and, left more indicator 
 if((int)$page !== 1){
     //left arrow button
     $html .= '<li class="list-group-item border-0 p-0">
             <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
             </li>';
+
     //left arrow button end
     //left arrow ajax function when button clicked
     $html .= '<script> 
@@ -138,13 +161,60 @@ if((int)$page !== 1){
     });
     </script>';
     //end left arrow function
+
+    //page number one
+    $html .= '<li class="list-group-item border-0 p-0">
+    <button class="btn btn-outline-dark mx-2" id="btn_1">1</button>
+    <input type="hidden" id="btn_input_1" value="1">
+    </li>';
+    
+    // page number one script function
+    $html .= '<script> 
+    $(document).ready(()=>{
+        
+
+        $("#btn_1").on("click",function(){
+            
+            let page = $("#btn_input_1").val();
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                success:(data)=>{
+                    $("#mydiv").html(data);
+                },
+            });
+        });
+
+        
+    });
+    </script>';
+    //end page number one
+    
+    // defined left side more indicator
+    $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2">....</button>
+            </li>';
+    // end defined left side more indicator
+    
 }
-// end left arrow
+// end left arrow, page one and, left more indicator 
 
-// pagination numbers
 
-for($i=1; $i <= $totalPages; $i++){
+// pagination for loop
+for($i=$startLink; $i <= $endLink; $i++){
+    // if $i equal to one this condition will skip
+    if(((int)$page !== 1) && ($i == 1)){
+        continue;
+    }
+    // if $i equal to max number this condition will end the loop
+    if(((int)$page !== $totalPages) && ($i == $totalPages)){
+        break;
+    }
 
+    // if $page equal to $i then page indicator background will be dark
     if($i == $page){
         $html .= '<li class="list-group-item border-0 p-0">
         <button class="btn btn-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
@@ -152,6 +222,7 @@ for($i=1; $i <= $totalPages; $i++){
         </li>
         ';
     }
+    // else page indicator border will be dark and background will be transparent
     else{
         $html .= '<li class="list-group-item border-0 p-0">
         <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
@@ -161,6 +232,8 @@ for($i=1; $i <= $totalPages; $i++){
     //ajax function for pagination number buttons
     $html .= '<script> 
     $(document).ready(()=>{
+        
+
         $("#btn_'.$i.'").on("click",function(){
             
             let page = $("#btn_input_'.$i.'").val();
@@ -182,21 +255,92 @@ for($i=1; $i <= $totalPages; $i++){
     // end 
     
 }
+// end pagination for loop
+
+// assign the value for the variable last page - link amount
+(int)$lastPreNumber = ((int)($totalPages - $link) == $page) ? $page : $totalPages - $link;
+
+// checking whether $lastPreNumber is smaller than last page number and $lastPreNumber smaller than and equal to current page number
+if(($lastPreNumber < (int)$totalPages) && ($lastPreNumber <= $page)){
+    $html .= '<li class="list-group-item border-0 p-0">
+    <button class="btn btn-outline-dark mx-2" id="btn_'.$totalPages.'">'.$totalPages.'</button>
+    <input type="hidden" id="btn_input_'.$totalPages.'" value="'.$totalPages.'">
+    </li>';
+
+    $html .= '<script> 
+    $(document).ready(()=>{
+        
+
+        $("#btn_'.$totalPages.'").on("click",function(){
+            
+            let page = $("#btn_input_'.$totalPages.'").val();
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                success:(data)=>{
+                    $("#mydiv").html(data);
+                },
+            });
+        });
+
+        
+    });
+    </script>';
+}
 
 
+// right arrow, page one and, left more indicator 
+if(((int)($lastPreNumber) > (int)$page)){
+// right more indicator
+    $html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-outline-dark mx-2">....</button>
+        </li>';
+// end right more indicator
 
-// end pagination numbers
+// last page button
+    $html .= '<li class="list-group-item border-0 p-0">
+        <button class="btn btn-outline-dark mx-2" id="btn_'.$totalPages.'">'.$totalPages.'</button>
+        <input type="hidden" id="btn_input_'.$totalPages.'" value="'.$totalPages.'">
+        </li>';
+    
+    $html .= '<script> 
+    $(document).ready(()=>{
+        
 
-// right arrow
-if((int)$page !== (int)$totalPages){
-//right arrow button
+        $("#btn_'.$totalPages.'").on("click",function(){
+            
+            let page = $("#btn_input_'.$totalPages.'").val();
+            
+            $.ajax({
+                url:"infor.php",
+                method:"POST",
+                data:{count: page},
+                dataType:"html",
+                success:(data)=>{
+                    $("#mydiv").html(data);
+                },
+            });
+        });
+
+        
+    });
+    </script>';
+    // end page button
+
+    // right arrow button
     $html .= '<li class="list-group-item border-0 p-0">
             <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
             </li>';
-//end right arrow button
-//right arrow button ajax function
+    //end right arrow button
+
+    //right arrow button ajax function
     $html .= '<script> 
     $(document).ready(()=>{
+        let paginationCount;
+
         $("#btn_right").on("click",function(){
             
             let page = '.$page.'+1;
@@ -213,16 +357,14 @@ if((int)$page !== (int)$totalPages){
         });
     });
     </script>';
-//end right arrow ajax function
+    //end right arrow ajax function
 }
-// end right arrow
+// end right arrow, page one and, left more indicator 
 
-// display output
 $html .= '</ul></div>';
+// end pagination
 
-// slider option
-
-// display
+// print output
 echo $html;
 
 

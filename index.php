@@ -46,6 +46,7 @@
             },
         });
         // end
+        
     </script>
 </head>
 <body>
@@ -74,11 +75,16 @@
         <!-- end container -->
     </section>
     <!-- end -->
+    
 </body>
 <script>
     // form submitting using ajax
     $(document).ready(function(){
-        
+        let total = 11;
+        for(let li = 1; li <= total; li++){
+            console.log(li);
+        }
+
         
 
         $('form').submit(function(e){
