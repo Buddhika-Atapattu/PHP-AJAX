@@ -10,26 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>Document</title>
-    <?php 
-    // database connection
-    $con = mysqli_connect('localhost','root','','testdb');
-
-    // define the item per page
-    $numbersPerPage = 3;
-
-    // select all images from database
-    $allImages = "SELECT * FROM image";
-
-    // run query
-    $rowsResult = $con->query($allImages);
-
-    // get tebal rows
-    $rows = mysqli_num_rows($rowsResult);
-
-    // get round number
-    $totalPages = ceil($rows/$numbersPerPage);
     
-    ?>
     <script>
         // fetching image data
 
@@ -56,17 +37,34 @@
             <div class="row">
                 <div class="col-lg-6 mx-auto">
                     <h1 id="text"></h1>
-                    <form action="" method="post" enctype="multipart/form-data">
+                    <form action="" method="post" enctype="multipart/form-data" id="image_form">
                         <div class="form-group my-4">
-                            <input type="file" name="image" id="image" class="form-control" placeholder="Email" accept="image/*">
+                            <div class="input-group">
+                                <label for="image" class="btn btn-outline-primary" id="select_img_btn">Select Image</label>
+                                <input type="file" name="image" id="image" class="form-control d-none" placeholder="Email" accept="image/*">
+                                <div class="input-group-text border-0 bg-white pe-0 pt-0 pb-0 m-0">
+                                    <button type="submit" class="btn btn-outline-success rounded-right">Submit</button>
+                                </div>
+                            </div>
+                            
                         </div>
-                        <button type="submit" class="btn btn-outline-success">Submit</button>
+                        
                     </form>
                 </div>
             </div>
         </div>
     </section>
     <!-- end uploading -->
+    
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <input type="text" name="search" id="search" class="form-control" placeholder="Search...">
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- display images -->
     <section class="mt-5">
@@ -80,14 +78,43 @@
 <script>
     // form submitting using ajax
     $(document).ready(function(){
-        let total = 11;
-        for(let li = 1; li <= total; li++){
-            console.log(li);
+        if ( window.history.replaceState ) {
+            window.history.replaceState( null, null, window.location.href );
         }
+        // search script
+        $("#search").keyup(()=>{
+            let search = $("#search").val();
 
-        
+            $.ajax({
+                url:'infor.php',
+                method:'POST',
+                dataType:'html',
+                data:{search:search},
+                beforeSend:(data)=>{
+                    console.log('beforeSend => '+ data);
+                },
+                success:(data)=>{
+                    $('form').get(0).reset();
+                    $('#mydiv').html(data);
+                },
+                error:(data)=>{
+                    console.log('error => '+data)
+                }
+            });
+        })
 
-        $('form').submit(function(e){
+        $("#image").on("change",()=>{
+            let fileLength = $("#image").get(0).files.length;
+            if(fileLength === 1){
+                $("#select_img_btn").removeClass("btn-outline-primary");
+                $("#select_img_btn").addClass("btn-primary");
+                $("#select_img_btn").text("Image has been selected");
+            }
+            
+        });
+
+        // image uploading
+        $('#image_form').submit(function(e){
             e.preventDefault();
             let formData = new FormData(this);
             formData.append('image',$('#image').get(0).files);

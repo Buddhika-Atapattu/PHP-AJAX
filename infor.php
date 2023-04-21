@@ -11,6 +11,8 @@ page.
 // database connection
 $con = mysqli_connect('localhost','root','','testdb');
 
+$GLOBALS['con'] = $con;
+
 // output
 $html = "";
 
@@ -27,25 +29,52 @@ if(isset($_POST['image'])){
         $move = move_uploaded_file($fileTemName,$path.$fileName);
         $filePath = $path.$fileName;
 
+        
+        $random_1 =  (string)rand(1000,10000);
+        $randomOneLength_1 = strlen($random_1);
+        
+        $random_2 =  (string)rand(1000,10000);
+        $randomOneLength_2 = strlen($random_2);
+
+        $letterArrayForImage = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
+
+        $name = "";
+
+        $word_1 = "";
+
+        $word_2 = "";
+
+        for($l_1 = 0; $l_1 < (int)$randomOneLength_1; $l_1++){
+            // echo $random[$l];
+            $index_1 = (int)$l_1;
+                
+            (int)$num_1 = $random[$index_1];
+
+            $word_1 .= (string)$letterArray[$num_1];
+        }
+
+        for($l_2 = 0; $l_2 < (int)$randomOneLength_2; $l_2++){
+            // echo $random[$l];
+            $index_2 = (int)$l_2;
+                
+            (int)$num_2 = $random_2[$index_2];
+
+            $word_2 .= (string)$letterArray[$num_2];
+        }
+        $name = $word_1." ".$word_2;
+
         if($move == true){
-            $sql = "INSERT INTO image(image_url) VALUES ('$filePath')";
+            $sql = "INSERT INTO image(image_url,name) VALUES ('$filePath','$name')";
             $result = $con->query($sql);
             if($result == true){
-                
+                echo "Done";
             }
         }
     }
 }
 
-
-
 // checking the page number
-if(isset($_POST['count'])){
-    $page = $_POST['count'];
-}
-else{
-    $page = 1;
-}
+$page = (isset($_POST['count'])) ? trim($_POST['count']) : 1;
 
 $html .= '<input type="hidden" id="page_id" value="'.$page.'">';
 
@@ -56,6 +85,19 @@ $numbersPerPage = 3;
 // define the starting from the database
 $startFrom = ($page - 1) * $numbersPerPage;
 
+// define search input
+$search = (isset($_POST['search'])) ? trim($_POST["search"]) : "";
+
+// echo $search."<br>";
+
+// search query
+$searchSql = "SELECT * FROM image img WHERE img.name LIKE '%$search%' ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
+
+// search result
+$searchResult = $con->query($searchSql);
+
+// print_r($searchResult);
+
 // select images per page from database
 $selectImages = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
 
@@ -63,7 +105,7 @@ $selectImages = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $startFrom,$
 $result = $con->query($selectImages);
 
 // select all images from database
-$allImages = "SELECT * FROM image";
+$allImages = (isset($_POST["search"])) ? "SELECT * FROM image img WHERE img.name LIKE '%$search%'" : "SELECT * FROM image";
 
 // run query
 $rowsResult = $con->query($allImages);
@@ -94,38 +136,75 @@ $startLink = (($page - $link) > 0 ) ? $page - $link : 1;
 
 $endLink = (($page + $link) < $last) ? $page + $link : $last;
 
+// assign the value for the variable last page - link amount
+(int)$lastPreNumber = ((int)($totalPages - $link) == $page) ? $page : $totalPages - $link;
 
 // define page number
 $html .= '<input type="hidden" id="page_id" name="page_id" value="'.(int)$page.'" class="d-none">';
 
-// images
-$html .= '<div class="row">';
-while($resultRow = $result->fetch_assoc()){
-    // image col
-    $html .=  '<div class="col-lg-4 card p-0">'.
-        '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
-    '</div>';
-    // end image col
+if($search !== ""){
+    // images
+    $html .= '<div class="row">';
+    while($resultRow = $searchResult->fetch_assoc()){
+        // image col
+        $html .=  '<div class="col-lg-4 card border-0 p-0">'.
+            '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<p>'. $resultRow['name'] .'</p>'.
+        '</div>';
+        // end image col
 
-    // full screen image
-    $html .='<script>
-    $(document).ready(()=>{
-        $("#img_'.$resultRow['id'].'").on("click",()=>{
-            let image = $("#img_'.$resultRow['id'].'").get(0);
-            if (image.requestFullscreen) {
-                image.requestFullscreen();
-            } else if (image.webkitRequestFullscreen) { /* Safari */
-                image.webkitRequestFullscreen();
-            } else if (image.msRequestFullscreen) { /* IE11 */
-                image.msRequestFullscreen();
-            }
+        // full screen image
+        $html .='<script>
+        $(document).ready(()=>{
+            $("#img_'.$resultRow['id'].'").on("click",()=>{
+                let image = $("#img_'.$resultRow['id'].'").get(0);
+                if (image.requestFullscreen) {
+                    image.requestFullscreen();
+                } else if (image.webkitRequestFullscreen) { /* Safari */
+                    image.webkitRequestFullscreen();
+                } else if (image.msRequestFullscreen) { /* IE11 */
+                    image.msRequestFullscreen();
+                }
+            });
         });
-    });
-    </script>';
-    // end full screen
+        </script>';
+        // end full screen
+    }
+    $html .= '</div>';
+    // end images
 }
-$html .= '</div>';
-// end images
+else{
+    // images
+    $html .= '<div class="row">';
+    while($resultRow = $result->fetch_assoc()){
+        // image col
+        $html .=  '<div class="col-lg-4 card border-0 p-0">'.
+            '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<p>'. $resultRow['name'] .'</p>'.
+        '</div>';
+        // end image col
+
+        // full screen image
+        $html .='<script>
+        $(document).ready(()=>{
+            $("#img_'.$resultRow['id'].'").on("click",()=>{
+                let image = $("#img_'.$resultRow['id'].'").get(0);
+                if (image.requestFullscreen) {
+                    image.requestFullscreen();
+                } else if (image.webkitRequestFullscreen) { /* Safari */
+                    image.webkitRequestFullscreen();
+                } else if (image.msRequestFullscreen) { /* IE11 */
+                    image.msRequestFullscreen();
+                }
+            });
+        });
+        </script>';
+        // end full screen
+    }
+    $html .= '</div>';
+    // end images
+}
+
 
 
 
@@ -257,8 +336,6 @@ for($i=$startLink; $i <= $endLink; $i++){
 }
 // end pagination for loop
 
-// assign the value for the variable last page - link amount
-(int)$lastPreNumber = ((int)($totalPages - $link) == $page) ? $page : $totalPages - $link;
 
 // checking whether $lastPreNumber is smaller than last page number and $lastPreNumber smaller than and equal to current page number
 if(($lastPreNumber < (int)$totalPages) && ($lastPreNumber <= $page)){
@@ -363,6 +440,80 @@ if(((int)($lastPreNumber) > (int)$page)){
 
 $html .= '</ul></div>';
 // end pagination
+
+//#############################################################################################################################################################
+/*
+Random string genaratorder
+
+01.
+    i.Defined a class called "Random"
+    ii.Define a public variable called "$name"
+    iii.Define a public method called "randomGen($count)"
+    iv.convert method parameater into integer
+    v.Define random number for last name and first name
+    vi.Defined letter array called "$letterArray"
+    vii.Defined two empty variable called "word_1" and "word_2"
+    viii.For loop for first name and last name
+    ix.Assign the first name and last name to public variable called "$name"
+    x.Run query update the name
+
+02.
+
+
+*/
+
+// class Random{
+//     public $name;
+//     public function randomGen($count){
+
+//         $count = (int)$count;
+
+//         $random_1[$count] =  (string)rand(1000,10000);
+//         $randomOneLength_1[$count] = strlen($random_1[$count]);
+
+//         $random_2[$count] =  (string)rand(1000,10000);
+//         $randomOneLength_2[$count] = strlen($random_2[$count]);
+
+//         $letterArray = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
+
+//         $word_1 = "";
+
+//         $word_2 = "";
+
+//         for($l_1 = 0; $l_1 < (int)$randomOneLength_1[$count]; $l_1++){
+//             // echo $random[$l];
+//             $index_1 = (int)$l_1;
+                
+//             (int)$num_1 = $random_1[$count][$index_1];
+
+//             $word_1 .= (string)$letterArray[$num_1];
+//         }
+
+//         for($l_2 = 0; $l_2 < (int)$randomOneLength_2[$count]; $l_2++){
+//             // echo $random[$l];
+//             $index_2 = (int)$l_2;
+                
+//             (int)$num_2 = $random_2[$count][$index_2];
+
+//             $word_2 .= (string)$letterArray[$num_2];
+//         }
+//         $this->name = $word_1." ".$word_2;
+
+//         $con = $GLOBALS['con'];
+//         $sql = "UPDATE image SET name = '$this->name' WHERE id = '$count'";
+//         $result = $con->query($sql);
+//         if($result == true){
+//             echo "update done";
+//         }
+
+//     }
+// }
+
+// for($num = 1; $num <= $rows; $num++){
+//     $randomGen = new Random();
+//     $randomGen->randomGen($num);
+// }
+//#######################################################################################################################################################
 
 // print output
 echo $html;
