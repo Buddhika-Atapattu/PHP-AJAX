@@ -35,31 +35,37 @@
     <section>
         <div class="container">
             <div class="row">
-                <div class="col-lg-6 mx-auto">
-                    <h1 id="text"></h1>
-                    <form action="" method="post" enctype="multipart/form-data" id="image_form">
-                        <div class="form-group my-4">
-                            <div class="input-group">
-                                <label for="image" class="btn btn-outline-primary" id="select_img_btn">Select Image</label>
-                                <input type="file" name="image" id="image" class="form-control d-none" placeholder="Email" accept="image/*">
-                                <div class="input-group-text border-0 bg-white pe-0 pt-0 pb-0 m-0">
-                                    <button type="submit" class="btn btn-outline-success rounded-right">Submit</button>
+                <div class="col-lg-10 mx-auto">
+                    <div class="d-flex justify-content-center">
+                        <form action="" method="post" enctype="multipart/form-data" id="image_form">
+                            <div class="form-group my-4">
+                                <div class="input-group">
+                                    <label for="image" class="btn btn-outline-primary rounded" id="select_img_btn">Select Image</label>
+                                    <input type="file" name="image" id="image" class="form-control d-none rounded" placeholder="Email" accept="image/*">
+                                    <div class="input-group-text border-0 bg-white pe-0 pt-0 pb-0 m-0">
+                                        <button type="submit" class="btn btn-outline-success rounded-right">Submit</button>
+                                    </div>
                                 </div>
                             </div>
-                            
-                        </div>
-                        
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     <!-- end uploading -->
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 mx-auto d-flex justify-content-center" id="imagepre"></div>
+            </div>
+        </div>
+    </section>
     
     <section>
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 mx-auto">
+                <div class="col-lg-8 mx-auto my-3">
                     <input type="text" name="search" id="search" class="form-control" placeholder="Search...">
                 </div>
             </div>
@@ -104,11 +110,23 @@
         })
 
         $("#image").on("change",()=>{
+            let file = $("#image")[0].files[0];
             let fileLength = $("#image").get(0).files.length;
+            let fileName = file.name;
+            let reader = new FileReader();
             if(fileLength === 1){
                 $("#select_img_btn").removeClass("btn-outline-primary");
                 $("#select_img_btn").addClass("btn-primary");
-                $("#select_img_btn").text("Image has been selected");
+                $("#select_img_btn").text("Image has been selected file name is " + fileName);
+                reader.onload = (e)=>{
+                    let url = e.target.result;
+                    console.log(url);
+                    $("#imagepre").html('<img class="card-top-image w-50 mx-auto" alt="image preview" src="'+ url +'">');
+                }
+                reader.onerror = function(e) {
+                    alert("I AM ERROR: " + e.target.error.code);
+                };
+                reader.readAsDataURL(file);
             }
             
         });
