@@ -10,7 +10,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>Document</title>
-    
+    <style>
+        .z-index-1{
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1;
+        }
+        .z-index-0{
+            position: absolute;
+            z-index: 0;
+        }
+    </style>
     <script>
         // fetching image data
 
@@ -148,8 +159,18 @@
                     console.log('beforeSend => '+data);
                 },
                 success:(data)=>{
-                    $('form').get(0).reset();
                     $('#mydiv').html(data);
+                    $("#imagepre").html("");
+                    $("#select_img_btn").removeClass("btn-outline-primary btn-primary");
+                    $("#select_img_btn").addClass("btn-success");
+                    $("#select_img_btn").text("Image has been uploaded!");
+                    let timeOut = setTimeout(()=>{
+                        $("#select_img_btn").removeClass("btn-primary btn-success");
+                        $("#select_img_btn").addClass("btn-outline-primary");
+                        $("#select_img_btn").text("Select Image");
+                    },5000);
+                    $('#image_form').get(0).reset();
+                    
                 },
                 error:(data)=>{
                     console.log('error => '+data)

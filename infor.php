@@ -48,9 +48,9 @@ if(isset($_POST['image'])){
             // echo $random[$l];
             $index_1 = (int)$l_1;
                 
-            (int)$num_1 = $random[$index_1];
+            (int)$num_1 = $random_1[$index_1];
 
-            $word_1 .= (string)$letterArray[$num_1];
+            $word_1 .= (string)$letterArrayForImage[$num_1];
         }
 
         for($l_2 = 0; $l_2 < (int)$randomOneLength_2; $l_2++){
@@ -59,7 +59,7 @@ if(isset($_POST['image'])){
                 
             (int)$num_2 = $random_2[$index_2];
 
-            $word_2 .= (string)$letterArray[$num_2];
+            $word_2 .= (string)$letterArrayForImage[$num_2];
         }
         $name = $word_1." ".$word_2;
 
@@ -67,10 +67,20 @@ if(isset($_POST['image'])){
             $sql = "INSERT INTO image(image_url,name) VALUES ('$filePath','$name')";
             $result = $con->query($sql);
             if($result == true){
-                echo "Done";
+               
             }
         }
     }
+}
+
+(int)$imageId = (isset($_POST['image_id'])) ? trim($_POST['image_id']) : 0; 
+
+$imageDeleteSql = "DELETE FROM image WHERE id = '$imageId'";
+
+$deleteImgResult = $con->query($imageDeleteSql);
+
+if($deleteImgResult == 1){
+    echo "Image is deleted!";
 }
 
 // checking the page number
@@ -148,7 +158,15 @@ if($search !== ""){
     while($resultRow = $searchResult->fetch_assoc()){
         // image col
         $html .=  '<div class="col-lg-4 card border-0 p-0">'.
-            '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<img id="image_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<ul class="d-inline-flex z-index-1 mt-3 me-3">
+                <li class="btn btn-info mx-1" id="img_'.$resultRow['id'].'">
+                    <i class="fa fa-eye"></i>
+                </li>
+                <li class="btn btn-danger mx-1" id="delete_btn_'.$resultRow['id'].'">
+                    <i class="fa fa-trash"></i>
+                </li>
+            </ul>'.
             '<p>'. $resultRow['name'] .'</p>'.
         '</div>';
         // end image col
@@ -156,8 +174,21 @@ if($search !== ""){
         // full screen image
         $html .='<script>
         $(document).ready(()=>{
+            $("#delete_btn_'.$resultRow['id'].'").on("click",()=>{
+                let image_'.$resultRow['id'].' = '.$resultRow['id'].';
+
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{image_id: image_'.$resultRow['id'].'},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
+            });
             $("#img_'.$resultRow['id'].'").on("click",()=>{
-                let image = $("#img_'.$resultRow['id'].'").get(0);
+                let image = $("#image_'.$resultRow['id'].'").get(0);
                 if (image.requestFullscreen) {
                     image.requestFullscreen();
                 } else if (image.webkitRequestFullscreen) { /* Safari */
@@ -179,7 +210,15 @@ else{
     while($resultRow = $result->fetch_assoc()){
         // image col
         $html .=  '<div class="col-lg-4 card border-0 p-0">'.
-            '<img id="img_'.$resultRow['id'].'"  alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<img id="image_'.$resultRow['id'].'" alt="" class="card-image-top h-100 btn border-0" src="'. $resultRow['image_url'] .'">'.
+            '<ul class="d-inline-flex z-index-1 mt-3 me-3">
+                <li class="btn btn-info mx-1" id="img_'.$resultRow['id'].'">
+                    <i class="fa fa-eye"></i>
+                </li>
+                <li class="btn btn-danger mx-1" id="delete_btn_'.$resultRow['id'].'">
+                    <i class="fa fa-trash"></i>
+                </li>
+            </ul>'.
             '<p>'. $resultRow['name'] .'</p>'.
         '</div>';
         // end image col
@@ -187,8 +226,22 @@ else{
         // full screen image
         $html .='<script>
         $(document).ready(()=>{
+            $("#delete_btn_'.$resultRow['id'].'").on("click",()=>{
+                let image_'.$resultRow['id'].' = '.$resultRow['id'].';
+
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{image_id: image_'.$resultRow['id'].'},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
+            });
+
             $("#img_'.$resultRow['id'].'").on("click",()=>{
-                let image = $("#img_'.$resultRow['id'].'").get(0);
+                let image = $("#image_'.$resultRow['id'].'").get(0);
                 if (image.requestFullscreen) {
                     image.requestFullscreen();
                 } else if (image.webkitRequestFullscreen) { /* Safari */
