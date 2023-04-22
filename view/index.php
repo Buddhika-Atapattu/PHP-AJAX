@@ -132,7 +132,7 @@
                 $("#select_img_btn").text("Image has been selected file name is " + fileName);
                 reader.onload = (e)=>{
                     let url = e.target.result;
-                    console.log(url);
+                    // console.log(url);
                     $("#imagepre").html('<img class="card-top-image w-50 mx-auto" alt="image preview" src="'+ url +'">');
                 }
                 reader.onerror = function(e) {

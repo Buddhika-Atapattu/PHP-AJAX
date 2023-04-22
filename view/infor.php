@@ -9,109 +9,24 @@ page.
 
 */
 // database connection
-$con = mysqli_connect('localhost','root','','testdb');
-
-$GLOBALS['con'] = $con;
+include('../classes/image.php');
 
 // output
 $html = "";
-
-// uploading image to the database
 if(isset($_POST['image'])){
     $file = $_FILES['image']['name'];
-
-    if($file !== ""){
-        
-        function unid(){
-                
-            $random_1 =  (string)rand(1000,10000);
-            $randomOneLength_1 = strlen($random_1);
-            
-            $random_2 =  (string)rand(1000,10000);
-            $randomOneLength_2 = strlen($random_2);
-            
-            $random_3 =  (string)rand(1000,10000);
-            $randomOneLength_3 = strlen($random_3);
-
-            $letterArrayForImage = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
-
-            $name = "";
-
-            $word_1 = "";
-
-            $word_2 = "";
-
-            $word_3 = "";
-
-            for($l_1 = 0; $l_1 < (int)$randomOneLength_1; $l_1++){
-                // echo $random[$l];
-                $index_1 = (int)$l_1;
-                    
-                (int)$num_1 = $random_1[$index_1];
-
-                $word_1 .= (string)$letterArrayForImage[$num_1];
-            }
-
-            for($l_2 = 0; $l_2 < (int)$randomOneLength_2; $l_2++){
-                // echo $random[$l];
-                $index_2 = (int)$l_2;
-                    
-                (int)$num_2 = $random_2[$index_2];
-
-                $word_2 .= (string)$letterArrayForImage[$num_2];
-            }
-
-            for($l_3 = 0; $l_3 < (int)$randomOneLength_3; $l_3++){
-                // echo $random[$l];
-                $index_3 = (int)$l_3;
-                    
-                (int)$num_3 = $random_3[$index_3];
-
-                $word_3 .= (string)$letterArrayForImage[$num_3];
-            }
-            $name = $word_1."-".$word_2."-".hexdec(uniqid())."-".$word_3;
-
-            return $name;
-        }
-
-        
-        
-        function checkUNID(){
-            $name = unid();
-
-            $con = $GLOBALS['con'];
-            $sql = "SELECT * FROM image WHERE uid = '$name'";
-            $result = $con->query($sql);
-            $row = $result->num_rows;
-
-            if($row <= 0){
-
-                $fileName = hexdec(uniqid()).'.png';
-                $exe = pathinfo($fileName,PATHINFO_EXTENSION);
-                $path = './image/';
-                $fileTemName = $_FILES['image']['tmp_name'];
-                $move = move_uploaded_file($fileTemName,$path.$fileName);
-                $filePath = $path.$fileName;
-                if($move == true){
-                    $sql = "INSERT INTO image(image_url,uid) VALUES ('$filePath','$name')";
-                    $result = $con->query($sql);
-                    if($result == true){
-                       
-                    }
-                }
-
-                return "Image uploaded successfully!";
-            }
-            else{
-                unid();
-            }
-        }
-
-        checkUNID();
-
+    $fileName = hexdec(uniqid()).'.png';
+    $path = './image/';
+    $fileTmpName = $_FILES['image']['tmp_name'];
+    $filePath = $path.$fileName;
+    $move = move_uploaded_file($fileTmpName,$path.$fileName);
+    if($move){
+        $imageInsertion = new Images();
+        $imageInsertion->insertImage($filePath);
     }
+    
 }
-
+// uploading image to the database
 
 
 // image deletion
