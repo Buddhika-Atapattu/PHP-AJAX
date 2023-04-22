@@ -21,67 +21,124 @@ if(isset($_POST['image'])){
     $file = $_FILES['image']['name'];
 
     if($file !== ""){
-        $fileName = hexdec(uniqid()).'.png';
-        $exe = pathinfo($fileName,PATHINFO_EXTENSION);
-        $path = './image/';
-        $fileTemName = $_FILES['image']['tmp_name'];
         
-        $move = move_uploaded_file($fileTemName,$path.$fileName);
-        $filePath = $path.$fileName;
-
-        
-        $random_1 =  (string)rand(1000,10000);
-        $randomOneLength_1 = strlen($random_1);
-        
-        $random_2 =  (string)rand(1000,10000);
-        $randomOneLength_2 = strlen($random_2);
-
-        $letterArrayForImage = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
-
-        $name = "";
-
-        $word_1 = "";
-
-        $word_2 = "";
-
-        for($l_1 = 0; $l_1 < (int)$randomOneLength_1; $l_1++){
-            // echo $random[$l];
-            $index_1 = (int)$l_1;
+        function unid(){
                 
-            (int)$num_1 = $random_1[$index_1];
+            $random_1 =  (string)rand(1000,10000);
+            $randomOneLength_1 = strlen($random_1);
+            
+            $random_2 =  (string)rand(1000,10000);
+            $randomOneLength_2 = strlen($random_2);
+            
+            $random_3 =  (string)rand(1000,10000);
+            $randomOneLength_3 = strlen($random_3);
 
-            $word_1 .= (string)$letterArrayForImage[$num_1];
+            $letterArrayForImage = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
+
+            $name = "";
+
+            $word_1 = "";
+
+            $word_2 = "";
+
+            $word_3 = "";
+
+            for($l_1 = 0; $l_1 < (int)$randomOneLength_1; $l_1++){
+                // echo $random[$l];
+                $index_1 = (int)$l_1;
+                    
+                (int)$num_1 = $random_1[$index_1];
+
+                $word_1 .= (string)$letterArrayForImage[$num_1];
+            }
+
+            for($l_2 = 0; $l_2 < (int)$randomOneLength_2; $l_2++){
+                // echo $random[$l];
+                $index_2 = (int)$l_2;
+                    
+                (int)$num_2 = $random_2[$index_2];
+
+                $word_2 .= (string)$letterArrayForImage[$num_2];
+            }
+
+            for($l_3 = 0; $l_3 < (int)$randomOneLength_3; $l_3++){
+                // echo $random[$l];
+                $index_3 = (int)$l_3;
+                    
+                (int)$num_3 = $random_3[$index_3];
+
+                $word_3 .= (string)$letterArrayForImage[$num_3];
+            }
+            $name = $word_1."-".$word_2."-".hexdec(uniqid())."-".$word_3;
+
+            return $name;
         }
 
-        for($l_2 = 0; $l_2 < (int)$randomOneLength_2; $l_2++){
-            // echo $random[$l];
-            $index_2 = (int)$l_2;
-                
-            (int)$num_2 = $random_2[$index_2];
+        
+        
+        function checkUNID(){
+            $name = unid();
 
-            $word_2 .= (string)$letterArrayForImage[$num_2];
-        }
-        $name = $word_1." ".$word_2;
-
-        if($move == true){
-            $sql = "INSERT INTO image(image_url,name) VALUES ('$filePath','$name')";
+            $con = $GLOBALS['con'];
+            $sql = "SELECT * FROM image WHERE uid = '$name'";
             $result = $con->query($sql);
-            if($result == true){
-               
+            $row = $result->num_rows;
+
+            if($row <= 0){
+
+                $fileName = hexdec(uniqid()).'.png';
+                $exe = pathinfo($fileName,PATHINFO_EXTENSION);
+                $path = './image/';
+                $fileTemName = $_FILES['image']['tmp_name'];
+                $move = move_uploaded_file($fileTemName,$path.$fileName);
+                $filePath = $path.$fileName;
+                if($move == true){
+                    $sql = "INSERT INTO image(image_url,uid) VALUES ('$filePath','$name')";
+                    $result = $con->query($sql);
+                    if($result == true){
+                       
+                    }
+                }
+
+                return "Image uploaded successfully!";
+            }
+            else{
+                unid();
             }
         }
+
+        checkUNID();
+
     }
 }
 
+
+
+// image deletion
+
 (int)$imageId = (isset($_POST['image_id'])) ? trim($_POST['image_id']) : 0; 
 
-$imageDeleteSql = "DELETE FROM image WHERE id = '$imageId'";
+if($imageId !== 0){
+    $selectImageSQL = "SELECT * FROM image img WHERE id = '$imageId'";
 
-$deleteImgResult = $con->query($imageDeleteSql);
+    $selectimageResult = $con->query($selectImageSQL);
 
-if($deleteImgResult == 1){
-    echo "Image is deleted!";
+    $imageRow = ($selectimageResult) ? $selectimageResult->fetch_assoc() : array();
+
+    $deleteLocaly = unlink($imageRow['image_url']);
+
+    if($deleteLocaly == 1){
+        $imageDeleteSql = "DELETE FROM image WHERE id = '$imageId'";
+
+        $deleteImgResult = $con->query($imageDeleteSql);
+
+        if($deleteImgResult == 1){
+            echo "Image is deleted!";
+        }
+    }
 }
+// end image deletion
+
 
 // checking the page number
 $page = (isset($_POST['count'])) ? trim($_POST['count']) : 1;
@@ -101,7 +158,7 @@ $search = (isset($_POST['search'])) ? trim($_POST["search"]) : "";
 // echo $search."<br>";
 
 // search query
-$searchSql = "SELECT * FROM image img WHERE img.name LIKE '%$search%' ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
+$searchSql = "SELECT * FROM image img WHERE img.uid LIKE '%$search%' ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
 
 // search result
 $searchResult = $con->query($searchSql);
@@ -115,7 +172,7 @@ $selectImages = "SELECT * FROM image img ORDER BY img.id DESC LIMIT $startFrom,$
 $result = $con->query($selectImages);
 
 // select all images from database
-$allImages = (isset($_POST["search"])) ? "SELECT * FROM image img WHERE img.name LIKE '%$search%'" : "SELECT * FROM image";
+$allImages = (isset($_POST["search"])) ? "SELECT * FROM image img WHERE img.uid LIKE '%$search%'" : "SELECT * FROM image";
 
 // run query
 $rowsResult = $con->query($allImages);
@@ -167,7 +224,7 @@ if($search !== ""){
                     <i class="fa fa-trash"></i>
                 </li>
             </ul>'.
-            '<p>'. $resultRow['name'] .'</p>'.
+            '<p>'. $resultRow['uid'] .'</p>'.
         '</div>';
         // end image col
 
@@ -219,7 +276,7 @@ else{
                     <i class="fa fa-trash"></i>
                 </li>
             </ul>'.
-            '<p>'. $resultRow['name'] .'</p>'.
+            '<p>'. $resultRow['uid'] .'</p>'.
         '</div>';
         // end image col
 
@@ -261,238 +318,240 @@ else{
 
 
 
-
-// pagination
-$html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
-
-// left arrow, page one and, left more indicator 
-if((int)$page !== 1){
-    //left arrow button
-    $html .= '<li class="list-group-item border-0 p-0">
-            <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
-            </li>';
-
-    //left arrow button end
-    //left arrow ajax function when button clicked
-    $html .= '<script> 
-    $(document).ready(()=>{
-        $("#btn_left").on("click",function(){
-            
-            let page = '.$page.'-1;
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
-            });
-        });
-    });
-    </script>';
-    //end left arrow function
-
-    //page number one
-    $html .= '<li class="list-group-item border-0 p-0">
-    <button class="btn btn-outline-dark mx-2" id="btn_1">1</button>
-    <input type="hidden" id="btn_input_1" value="1">
-    </li>';
+if($rows !== 0){
     
-    // page number one script function
-    $html .= '<script> 
-    $(document).ready(()=>{
-        
+    // pagination
+    $html .= '</div><div class="d-flex justify-content-end my-3"><ul class="d-inline-flex" id="pagination">';
 
-        $("#btn_1").on("click",function(){
-            
-            let page = $("#btn_input_1").val();
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
-            });
-        });
-
-        
-    });
-    </script>';
-    //end page number one
-    
-    // defined left side more indicator
-    $html .= '<li class="list-group-item border-0 p-0">
-            <button class="btn btn-outline-dark mx-2">....</button>
-            </li>';
-    // end defined left side more indicator
-    
-}
-// end left arrow, page one and, left more indicator 
-
-
-// pagination for loop
-for($i=$startLink; $i <= $endLink; $i++){
-    // if $i equal to one this condition will skip
-    if(((int)$page !== 1) && ($i == 1)){
-        continue;
-    }
-    // if $i equal to max number this condition will end the loop
-    if(((int)$page !== $totalPages) && ($i == $totalPages)){
-        break;
-    }
-
-    // if $page equal to $i then page indicator background will be dark
-    if($i == $page){
+    // left arrow, page one and, left more indicator 
+    if((int)$page !== 1){
+        //left arrow button
         $html .= '<li class="list-group-item border-0 p-0">
-        <button class="btn btn-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
-        <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
-        </li>
-        ';
-    }
-    // else page indicator border will be dark and background will be transparent
-    else{
+                <button class="btn btn-outline-dark mx-2" id="btn_left"><i class="fa fa-angle-left"></i></button>
+                </li>';
+
+        //left arrow button end
+        //left arrow ajax function when button clicked
+        $html .= '<script> 
+        $(document).ready(()=>{
+            $("#btn_left").on("click",function(){
+                
+                let page = '.$page.'-1;
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
+            });
+        });
+        </script>';
+        //end left arrow function
+
+        //page number one
         $html .= '<li class="list-group-item border-0 p-0">
-        <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
-        <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+        <button class="btn btn-outline-dark mx-2" id="btn_1">1</button>
+        <input type="hidden" id="btn_input_1" value="1">
         </li>';
+        
+        // page number one script function
+        $html .= '<script> 
+        $(document).ready(()=>{
+            
+
+            $("#btn_1").on("click",function(){
+                
+                let page = $("#btn_input_1").val();
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
+            });
+
+            
+        });
+        </script>';
+        //end page number one
+        
+        // defined left side more indicator
+        $html .= '<li class="list-group-item border-0 p-0">
+                <button class="btn btn-outline-dark mx-2">....</button>
+                </li>';
+        // end defined left side more indicator
+        
     }
-    //ajax function for pagination number buttons
-    $html .= '<script> 
-    $(document).ready(()=>{
-        
+    // end left arrow, page one and, left more indicator 
 
-        $("#btn_'.$i.'").on("click",function(){
+
+    // pagination for loop
+    for($i=$startLink; $i <= $endLink; $i++){
+        // if $i equal to one this condition will skip
+        if(((int)$page !== 1) && ($i == 1)){
+            continue;
+        }
+        // if $i equal to max number this condition will end the loop
+        if(((int)$page !== $totalPages) && ($i == $totalPages)){
+            break;
+        }
+
+        // if $page equal to $i then page indicator background will be dark
+        if($i == $page){
+            $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
+            <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+            </li>
+            ';
+        }
+        // else page indicator border will be dark and background will be transparent
+        else{
+            $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2" id="btn_'.$i.'">'.$i.'</button>
+            <input type="hidden" id="btn_input_'.$i.'" value="'.$i.'">
+            </li>';
+        }
+        //ajax function for pagination number buttons
+        $html .= '<script> 
+        $(document).ready(()=>{
             
-            let page = $("#btn_input_'.$i.'").val();
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
+
+            $("#btn_'.$i.'").on("click",function(){
+                
+                let page = $("#btn_input_'.$i.'").val();
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
             });
-        });
 
-        
-    });
-    </script>';
-    // end 
-    
-}
-// end pagination for loop
-
-
-// checking whether $lastPreNumber is smaller than last page number and $lastPreNumber smaller than and equal to current page number
-if(($lastPreNumber < (int)$totalPages) && ($lastPreNumber <= $page)){
-    $html .= '<li class="list-group-item border-0 p-0">
-    <button class="btn btn-outline-dark mx-2" id="btn_'.$totalPages.'">'.$totalPages.'</button>
-    <input type="hidden" id="btn_input_'.$totalPages.'" value="'.$totalPages.'">
-    </li>';
-
-    $html .= '<script> 
-    $(document).ready(()=>{
-        
-
-        $("#btn_'.$totalPages.'").on("click",function(){
             
-            let page = $("#btn_input_'.$totalPages.'").val();
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
-            });
         });
-
+        </script>';
+        // end 
         
-    });
-    </script>';
-}
+    }
+    // end pagination for loop
 
 
-// right arrow, page one and, left more indicator 
-if(((int)($lastPreNumber) > (int)$page)){
-// right more indicator
-    $html .= '<li class="list-group-item border-0 p-0">
-        <button class="btn btn-outline-dark mx-2">....</button>
-        </li>';
-// end right more indicator
-
-// last page button
-    $html .= '<li class="list-group-item border-0 p-0">
+    // checking whether $lastPreNumber is smaller than last page number and $lastPreNumber smaller than and equal to current page number
+    if(($lastPreNumber < (int)$totalPages) && ($lastPreNumber <= $page)){
+        $html .= '<li class="list-group-item border-0 p-0">
         <button class="btn btn-outline-dark mx-2" id="btn_'.$totalPages.'">'.$totalPages.'</button>
         <input type="hidden" id="btn_input_'.$totalPages.'" value="'.$totalPages.'">
         </li>';
-    
-    $html .= '<script> 
-    $(document).ready(()=>{
-        
 
-        $("#btn_'.$totalPages.'").on("click",function(){
+        $html .= '<script> 
+        $(document).ready(()=>{
             
-            let page = $("#btn_input_'.$totalPages.'").val();
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
+
+            $("#btn_'.$totalPages.'").on("click",function(){
+                
+                let page = $("#btn_input_'.$totalPages.'").val();
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
             });
+
+            
         });
+        </script>';
+    }
 
-        
-    });
-    </script>';
-    // end page button
 
-    // right arrow button
-    $html .= '<li class="list-group-item border-0 p-0">
-            <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
+    // right arrow, page one and, left more indicator 
+    if(((int)($lastPreNumber) > (int)$page)){
+    // right more indicator
+        $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2">....</button>
             </li>';
-    //end right arrow button
+    // end right more indicator
 
-    //right arrow button ajax function
-    $html .= '<script> 
-    $(document).ready(()=>{
-        let paginationCount;
+    // last page button
+        $html .= '<li class="list-group-item border-0 p-0">
+            <button class="btn btn-outline-dark mx-2" id="btn_'.$totalPages.'">'.$totalPages.'</button>
+            <input type="hidden" id="btn_input_'.$totalPages.'" value="'.$totalPages.'">
+            </li>';
+        
+        $html .= '<script> 
+        $(document).ready(()=>{
+            
 
-        $("#btn_right").on("click",function(){
+            $("#btn_'.$totalPages.'").on("click",function(){
+                
+                let page = $("#btn_input_'.$totalPages.'").val();
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
+            });
+
             
-            let page = '.$page.'+1;
-            
-            $.ajax({
-                url:"infor.php",
-                method:"POST",
-                data:{count: page},
-                dataType:"html",
-                success:(data)=>{
-                    $("#mydiv").html(data);
-                },
+        });
+        </script>';
+        // end page button
+
+        // right arrow button
+        $html .= '<li class="list-group-item border-0 p-0">
+                <button class="btn btn-outline-dark mx-2" id="btn_right"><i class="fa fa-angle-right"></i></button>
+                </li>';
+        //end right arrow button
+
+        //right arrow button ajax function
+        $html .= '<script> 
+        $(document).ready(()=>{
+            let paginationCount;
+
+            $("#btn_right").on("click",function(){
+                
+                let page = '.$page.'+1;
+                
+                $.ajax({
+                    url:"infor.php",
+                    method:"POST",
+                    data:{count: page},
+                    dataType:"html",
+                    success:(data)=>{
+                        $("#mydiv").html(data);
+                    },
+                });
             });
         });
-    });
-    </script>';
-    //end right arrow ajax function
-}
-// end right arrow, page one and, left more indicator 
+        </script>';
+        //end right arrow ajax function
+    }
+    // end right arrow, page one and, left more indicator 
 
-$html .= '</ul></div>';
-// end pagination
+    $html .= '</ul></div>';
+    // end pagination
+}
 
 //#############################################################################################################################################################
 /*

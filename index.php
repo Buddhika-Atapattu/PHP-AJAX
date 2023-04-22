@@ -54,7 +54,7 @@
                                     <label for="image" class="btn btn-outline-primary rounded" id="select_img_btn">Select Image</label>
                                     <input type="file" name="image" id="image" class="form-control d-none rounded" placeholder="Email" accept="image/*">
                                     <div class="input-group-text border-0 bg-white pe-0 pt-0 pb-0 m-0">
-                                        <button type="submit" class="btn btn-outline-success rounded-right">Submit</button>
+                                        <button type="submit" id="submit" class="btn btn-outline-success rounded-right">Submit</button>
                                     </div>
                                 </div>
                             </div>
@@ -126,6 +126,7 @@
             let fileName = file.name;
             let reader = new FileReader();
             if(fileLength === 1){
+                $("#submit").attr('disabled',false);
                 $("#select_img_btn").removeClass("btn-outline-primary");
                 $("#select_img_btn").addClass("btn-primary");
                 $("#select_img_btn").text("Image has been selected file name is " + fileName);
@@ -144,38 +145,55 @@
 
         // image uploading
         $('#image_form').submit(function(e){
+
             e.preventDefault();
             let formData = new FormData(this);
+            let file = $("#image")[0].files[0];
+            let fileLength = $("#image").get(0).files.length;
+            let fileName = file.name;
             formData.append('image',$('#image').get(0).files);
-            $.ajax({
-                url:'infor.php',
-                method:'POST',
-                dataType:'html',
-                data:formData,
-                processData:false,
-                contentType:false,
-                cache:false,
-                beforeSend:(data)=>{
-                    console.log('beforeSend => '+data);
-                },
-                success:(data)=>{
-                    $('#mydiv').html(data);
-                    $("#imagepre").html("");
-                    $("#select_img_btn").removeClass("btn-outline-primary btn-primary");
-                    $("#select_img_btn").addClass("btn-success");
-                    $("#select_img_btn").text("Image has been uploaded!");
-                    let timeOut = setTimeout(()=>{
-                        $("#select_img_btn").removeClass("btn-primary btn-success");
-                        $("#select_img_btn").addClass("btn-outline-primary");
-                        $("#select_img_btn").text("Select Image");
-                    },5000);
-                    $('#image_form').get(0).reset();
-                    
-                },
-                error:(data)=>{
-                    console.log('error => '+data)
-                }
-            });
+            if(fileLength !== 0){
+                $.ajax({
+                    url:'infor.php',
+                    method:'POST',
+                    dataType:'html',
+                    data:formData,
+                    processData:false,
+                    contentType:false,
+                    cache:false,
+                    beforeSend:(data)=>{
+                        console.log('beforeSend => '+data);
+                    },
+                    success:(data)=>{
+                        $('#mydiv').html(data);
+                        $("#imagepre").html("");
+                        $("#select_img_btn").removeClass("btn-outline-primary btn-primary");
+                        $("#select_img_btn").addClass("btn-success");
+                        $("#select_img_btn").text("Image has been uploaded!");
+                        let reset = $('form')[0].reset();
+                        let timeOut = setTimeout(()=>{
+                            
+                            $("#select_img_btn").removeClass("btn-primary btn-success");
+                            $("#select_img_btn").addClass("btn-outline-primary");
+                            $("#select_img_btn").text("Select Image");
+                            if(reset){
+                                $("#submit").attr('disabled',false);
+                            
+                                console.log(fileLength);
+                            }
+                            else{
+                                $("#submit").attr('disabled',true);
+                            }
+                        },3000);
+                        // $('#image_form').get(0).reset();
+                        
+                    },
+                    error:(data)=>{
+                        console.log('error => '+data)
+                    }
+                });
+            }
+            
         });
     });
     // end
