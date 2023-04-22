@@ -8,6 +8,7 @@ class Images{
     private $randomNumberForLatter;
     private $ranNumber;
     private $uid;
+    private $imageFile;
 
     private function genRandomNumberForLetter(){
         $this->randomNumberForLatter =  (string)rand(0,25);
@@ -65,12 +66,55 @@ class Images{
         }
     }
 
-    public function insertImage($filePath){
-        $filePath = $filePath;
+    public function insertImage($imageFile){
+
         $uid =  $this->checkUidExistance();
-        $con = $GLOBALS['con'];
-        $sql = "INSERT INTO image(image_url,uid) VALUES ('$filePath','$uid')";
-        $result = $con->query($sql);
-        return $result;
+        $this->imageFile = $imageFile;
+        $file = $this->imageFile['name'];
+        $fileName = hexdec(uniqid()).'.png';
+        $path = './image/';
+        $movePath = '../view/image/';
+        $fileTmpName = $this->imageFile['tmp_name'];
+        $filePath = $path.$fileName;
+        $move = move_uploaded_file($fileTmpName, $movePath.$fileName);
+        if($move){
+            $con = $GLOBALS['con'];
+            $sql = "INSERT INTO image(image_url,uid) VALUES ('$filePath','$uid')";
+            $result = $con->query($sql);
+            if($result){
+                return $result;
+            }
+            else{
+                return "Image doesn't inserted";
+            }
+        }
+        else{
+            return "Image doesn't move to local directory";
+        }
+        // print_r($filePath);
+    }
+
+    public function deleteImage($imageId){
+        if($imageId !== 0){
+            $selectImageSQL = "SELECT * FROM image img WHERE id = '$imageId'";
+
+            $con = $GLOBALS['con'];
+        
+            $selectimageResult = $con->query($selectImageSQL);
+        
+            $imageRow = ($selectimageResult) ? $selectimageResult->fetch_assoc() : array();
+        
+            $deleteLocaly = (count($imageRow) !== 0) ? unlink($imageRow['image_url']) : "";
+        
+            if($deleteLocaly == 1){
+                $imageDeleteSql = "DELETE FROM image WHERE id = '$imageId'";
+        
+                $deleteImgResult = $con->query($imageDeleteSql);
+        
+                if($deleteImgResult == 1){
+                    echo "Image is deleted!";
+                }
+            }
+        }
     }
 }

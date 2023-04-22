@@ -8,50 +8,24 @@ page.
 
 
 */
-// database connection
+// include image class and database connection
 include('../classes/image.php');
+// defined class object
+$image = new Images();
 
 // output
 $html = "";
-if(isset($_POST['image'])){
-    $file = $_FILES['image']['name'];
-    $fileName = hexdec(uniqid()).'.png';
-    $path = './image/';
-    $fileTmpName = $_FILES['image']['tmp_name'];
-    $filePath = $path.$fileName;
-    $move = move_uploaded_file($fileTmpName,$path.$fileName);
-    if($move){
-        $imageInsertion = new Images();
-        $imageInsertion->insertImage($filePath);
-    }
-    
-}
-// uploading image to the database
 
+// image uploading
+if(isset($_POST['image'])){
+    $file = $_FILES['image'];
+    $image->insertImage($file);
+}
+// end image uploading
 
 // image deletion
-
 (int)$imageId = (isset($_POST['image_id'])) ? trim($_POST['image_id']) : 0; 
-
-if($imageId !== 0){
-    $selectImageSQL = "SELECT * FROM image img WHERE id = '$imageId'";
-
-    $selectimageResult = $con->query($selectImageSQL);
-
-    $imageRow = ($selectimageResult) ? $selectimageResult->fetch_assoc() : array();
-
-    $deleteLocaly = unlink($imageRow['image_url']);
-
-    if($deleteLocaly == 1){
-        $imageDeleteSql = "DELETE FROM image WHERE id = '$imageId'";
-
-        $deleteImgResult = $con->query($imageDeleteSql);
-
-        if($deleteImgResult == 1){
-            echo "Image is deleted!";
-        }
-    }
-}
+$image->deleteImage($imageId);
 // end image deletion
 
 
@@ -93,7 +67,7 @@ $allImages = (isset($_POST["search"])) ? "SELECT * FROM image img WHERE img.uid 
 $rowsResult = $con->query($allImages);
 
 // get tebal rows
-$rows = mysqli_num_rows($rowsResult);
+$rows = $rowsResult->num_rows;
 
 // get round number
 $totalPages = ceil($rows/$numbersPerPage);
@@ -110,7 +84,7 @@ if($page > $totalPages){
 04. Defined end pagination number by $endLink
 */
 
-$link = 3;
+$link = 1;
 
 $last = $totalPages ;
 
@@ -467,80 +441,6 @@ if($rows !== 0){
     $html .= '</ul></div>';
     // end pagination
 }
-
-//#############################################################################################################################################################
-/*
-Random string genaratorder
-
-01.
-    i.Defined a class called "Random"
-    ii.Define a public variable called "$name"
-    iii.Define a public method called "randomGen($count)"
-    iv.convert method parameater into integer
-    v.Define random number for last name and first name
-    vi.Defined letter array called "$letterArray"
-    vii.Defined two empty variable called "word_1" and "word_2"
-    viii.For loop for first name and last name
-    ix.Assign the first name and last name to public variable called "$name"
-    x.Run query update the name
-
-02.
-
-
-*/
-
-// class Random{
-//     public $name;
-//     public function randomGen($count){
-
-//         $count = (int)$count;
-
-//         $random_1[$count] =  (string)rand(1000,10000);
-//         $randomOneLength_1[$count] = strlen($random_1[$count]);
-
-//         $random_2[$count] =  (string)rand(1000,10000);
-//         $randomOneLength_2[$count] = strlen($random_2[$count]);
-
-//         $letterArray = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z');
-
-//         $word_1 = "";
-
-//         $word_2 = "";
-
-//         for($l_1 = 0; $l_1 < (int)$randomOneLength_1[$count]; $l_1++){
-//             // echo $random[$l];
-//             $index_1 = (int)$l_1;
-                
-//             (int)$num_1 = $random_1[$count][$index_1];
-
-//             $word_1 .= (string)$letterArray[$num_1];
-//         }
-
-//         for($l_2 = 0; $l_2 < (int)$randomOneLength_2[$count]; $l_2++){
-//             // echo $random[$l];
-//             $index_2 = (int)$l_2;
-                
-//             (int)$num_2 = $random_2[$count][$index_2];
-
-//             $word_2 .= (string)$letterArray[$num_2];
-//         }
-//         $this->name = $word_1." ".$word_2;
-
-//         $con = $GLOBALS['con'];
-//         $sql = "UPDATE image SET name = '$this->name' WHERE id = '$count'";
-//         $result = $con->query($sql);
-//         if($result == true){
-//             echo "update done";
-//         }
-
-//     }
-// }
-
-// for($num = 1; $num <= $rows; $num++){
-//     $randomGen = new Random();
-//     $randomGen->randomGen($num);
-// }
-//#######################################################################################################################################################
 
 // print output
 echo $html;
