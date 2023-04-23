@@ -32,8 +32,8 @@ $image->deleteImage($imageId);
 // checking the page number
 $page = (isset($_POST['count'])) ? trim($_POST['count']) : 1;
 
-$html .= '<input type="hidden" id="page_id" value="'.$page.'">';
-
+// define search input
+$search = (isset($_POST['search']) && (trim($_POST['search']) !== "")) ? trim($_POST["search"]) : "";
 
 // define the item per page
 $numbersPerPage = 3;
@@ -41,13 +41,16 @@ $numbersPerPage = 3;
 // define the starting from the database
 $startFrom = ($page - 1) * $numbersPerPage;
 
-// define search input
-$search = (isset($_POST['search'])) ? trim($_POST["search"]) : "";
-
 // echo $search."<br>";
 
 // search query
 $searchSql = "SELECT * FROM image img WHERE img.uid LIKE '%$search%' ORDER BY img.id DESC LIMIT $startFrom,$numbersPerPage";
+
+$searchSQLALL = "SELECT * FROM image img WHERE img.uid LIKE '%$search%'";
+
+$searchResult = $con -> query($searchSQLALL);
+
+$searchRow = $searchResult->num_rows;
 
 // search result
 $searchResult = $con->query($searchSql);
@@ -86,7 +89,7 @@ if($page > $totalPages){
 
 $link = 1;
 
-$last = $totalPages ;
+$last = (isset($_POST['search'])) ? $searchRow : $totalPages ;
 
 $startLink = (($page - $link) > 0 ) ? $page - $link : 1;
 
@@ -226,11 +229,12 @@ if($rows !== 0){
             $("#btn_left").on("click",function(){
                 
                 let page = '.$page.'-1;
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);
@@ -255,11 +259,12 @@ if($rows !== 0){
             $("#btn_1").on("click",function(){
                 
                 let page = $("#btn_input_1").val();
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);
@@ -316,11 +321,12 @@ if($rows !== 0){
             $("#btn_'.$i.'").on("click",function(){
                 
                 let page = $("#btn_input_'.$i.'").val();
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);
@@ -351,11 +357,12 @@ if($rows !== 0){
             $("#btn_'.$totalPages.'").on("click",function(){
                 
                 let page = $("#btn_input_'.$totalPages.'").val();
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);
@@ -390,11 +397,12 @@ if($rows !== 0){
             $("#btn_'.$totalPages.'").on("click",function(){
                 
                 let page = $("#btn_input_'.$totalPages.'").val();
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);
@@ -421,11 +429,12 @@ if($rows !== 0){
             $("#btn_right").on("click",function(){
                 
                 let page = '.$page.'+1;
+                let search = $("#search").val();
                 
                 $.ajax({
                     url:"infor.php",
                     method:"POST",
-                    data:{count: page},
+                    data:{count: page,search:search},
                     dataType:"html",
                     success:(data)=>{
                         $("#mydiv").html(data);

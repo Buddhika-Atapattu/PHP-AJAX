@@ -101,12 +101,15 @@
         // search script
         $("#search").keyup(()=>{
             let search = $("#search").val();
+            // alert(page_id);
+            let page_id = $("#page_id").val();
+            console.log(page_id);
 
             $.ajax({
                 url:'infor.php',
                 method:'POST',
                 dataType:'html',
-                data:{search:search},
+                data:{search:search,count:page_id},
                 beforeSend:(data)=>{
                     console.log('beforeSend => '+ data);
                 },
